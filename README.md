@@ -434,3 +434,18 @@ See Example_scripts/ directory for detailed examples:
 - Example2a/b/c-EISfit.py: Single temperature fitting
 - Example3-Batchfit.py: Temperature series analysis
 - Example4-Singlechi.py: Advanced parameter sharing
+
+
+---
+
+## License
+EISFitpython is distributed under the MIT License.
+
+---
+
+## Author
+
+Sheyi Clement Adediwura (c) 2024
+
+---
+
