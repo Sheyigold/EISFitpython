@@ -1,0 +1,649 @@
+# EISFitpython: Advanced Electrochemical Impedance Spectroscopy Analysis
+
+A comprehensive Python package for analyzing Electrochemical Impedance Spectroscopy (EIS) data, with advanced features for equivalent circuit modeling, batch analysis, and temperature-dependent studies.
+
+# I. Theoretical Background
+
+## Fundamentals of Electrochemical Impedance Spectroscopy
+
+Electrochemical Impedance Spectroscopy (EIS) is a powerful analytical technique that characterizes the electrical properties of materials and their interfaces with electronically conducting electrodes. The technique involves:
+
+1. **Signal Application**: 
+   $$E(t) = E_0\sin(\omega t)$$
+
+2. **System Response**: 
+   $$I(t) = I_0\sin(\omega t + \phi)$$
+
+3. **Impedance Calculation**: 
+   $$Z(\omega) = \frac{E(t)}{I(t)} = |Z|e^{j\phi} = Z' + jZ''$$
+
+Where:
+- $\omega = 2\pi f$ is the angular frequency
+- $\phi$ is the phase shift
+- $|Z|$ is the impedance magnitude
+- $Z'$ and $Z''$ are real and imaginary components
+
+### Data Representation
+
+EIS data is commonly presented in two formats:
+
+1. **Nyquist Plot**
+   - Plots -Z" vs Z'
+   - Each point represents impedance at one frequency
+   - Shape reveals underlying physical processes
+   - Limitation: Frequency information not explicit
+
+2. **Bode Plot**
+   - Log|Z| and φ vs log(f)
+   - Explicitly shows frequency dependence
+   - Better represents high-frequency behavior
+   - Complements Nyquist plot information
+
+## Equivalent Circuit Elements
+
+EIS data is analyzed using equivalent circuit models composed of these fundamental elements:
+
+### 1. Resistor (R)
+- Impedance: $$Z_R = R$$
+- Phase shift: $\phi = 0°$
+- Represents:
+  * Solution resistance ($R_\mathrm{s}$)
+  * Charge transfer resistance ($R_\mathrm{ct}$)
+  * Contact resistance ($R_\mathrm{c}$)
+
+### 2. Capacitor (C)
+- Impedance: $$Z_C = \frac{1}{\mathrm{j}\omega C}$$
+- Phase shift: $\phi = -90°$
+- Represents:
+  * Double layer capacitance ($C_\mathrm{dl}$)
+  * Space charge capacitance ($C_\mathrm{sc}$)
+  * Coating capacitance ($C_\mathrm{c}$)
+
+### 3. Inductor (L)
+- Impedance: $$Z_L = \mathrm{j}\omega L$$
+- Phase shift: $\phi = +90°$
+- Represents:
+  * Adsorption processes
+  * Current collection geometry
+
+### 4. Constant Phase Element (CPE)
+- Impedance: $$Z_\mathrm{CPE} = \frac{1}{Q(\mathrm{j}\omega)^{\alpha}}$$
+- Phase shift: $\phi = -(90\cdot\alpha)°$
+- Parameters: 
+  * $Q$ (magnitude, units: F·s^(α-1))
+  * $\alpha$ (exponent, $0 \leq \alpha \leq 1$)
+- Represents:
+  * Non-ideal capacitive behavior
+  * Surface roughness effects
+  * Distribution of reaction rates
+
+### 5. Warburg Element (W)
+- Semi-infinite diffusion: $$Z_W = \frac{\sigma}{\sqrt{\omega}}(1-\mathrm{j})$$
+- Finite-length diffusion: $$Z_W = \frac{\sigma\tanh(\sqrt{\mathrm{j}\omega\tau})}{\sqrt{\mathrm{j}\omega\tau}}$$
+- Phase shift: $\phi = -45°$ (semi-infinite)
+- Parameters:
+  * $\sigma$ (Warburg coefficient, Ω·s^(-1/2))
+  * $\tau$ (diffusion time constant, s)
+
+## Complex Nonlinear Least-Squares Fitting
+
+Electrochemical Impedance Spectroscopy (EIS) represents a non-linear system where impedance data must be fitted using complex non-linear least-squares (CNLS) analysis to extract meaningful physical parameters. The CNLS technique operates by minimizing a sum of squares function S, which quantifies the difference between experimental data and the theoretical model.
+
+### Mathematical Framework
+
+The sum of squares function for model fitting:
+
+$$S = \sum_{i=1}^{m} w_i[f_i^\mathrm{EXP}(x_i) - f_i^\mathrm{TH}(x, P)]^2$$
+
+For EIS data over frequency range $\omega_i$:
+
+$$S = \sum_{i=1}^{N} \{w_i^\mathrm{RE}[\mathrm{Re}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Re}Z_i^\mathrm{TH}(\omega_i, P)]^2 + w_i^\mathrm{IM}[\mathrm{Im}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Im}Z_i^\mathrm{TH}(\omega_i, P)]^2\}$$
+
+Where:
+- $Z_i^\mathrm{EXP}$ and $Z_i^\mathrm{TH}$ represent experimental and theoretical impedance respectively
+- Re and Im denote real and imaginary components
+- $w_i^\mathrm{RE}$ and $w_i^\mathrm{IM}$ are weighting factors for real and imaginary components
+
+### Weighting Methods
+
+The choice of weighting method significantly impacts the fitting quality. EISFitpython implements three established approaches:
+
+1. **Unit Weighting**
+   $$w_i^\mathrm{RE} = w_i^\mathrm{IM} = 1$$
+   - Treats all data points equally
+   - May overemphasize larger impedance values
+   - Suitable for data with uniform uncertainties
+
+2. **Proportional Weighting**
+   $$w_i^\mathrm{RE} = \frac{1}{(\mathrm{Re}Z_i)^2}, \quad w_i^\mathrm{IM} = \frac{1}{(\mathrm{Im}Z_i)^2}$$
+   - Assumes constant relative errors
+   - May overemphasize high and low-frequency regions
+   - Useful when uncertainties scale with impedance magnitude
+
+3. **Modulus Weighting**
+   $$w_i^\mathrm{RE} = w_i^\mathrm{IM} = \frac{1}{|Z_i|^2}$$
+   - Balances contributions from small and large impedances
+   - Provides equal statistical weight to real and imaginary components
+   - Recommended for typical EIS measurements
+
+### Statistical Analysis and Error Propagation
+
+#### Chi-Square Analysis
+The reduced chi-square ($\chi_r^2$) is calculated as:
+
+$$\chi_r^2 = \frac{1}{2N - n_p} \sum_{i=1}^N \left[\frac{(Z'_{\mathrm{exp},i} - Z'_{\mathrm{fit},i})^2}{\sigma_{Z',i}^2} + \frac{(Z''_{\mathrm{exp},i} - Z''_{\mathrm{fit},i})^2}{\sigma_{Z'',i}^2}\right]$$
+
+where:
+- N is the number of data points
+- n_p is the number of fitting parameters
+- $\sigma_{Z',i}$ and $\sigma_{Z'',i}$ are uncertainties in real and imaginary components
+
+#### Activation Energy Analysis
+The Arrhenius equation for conductivity:
+
+$$\sigma(T) = \frac{\sigma_0}{T} \exp\left(-\frac{E_\mathrm{a}}{k_\mathrm{B}T}\right)$$
+
+Error propagation in activation energy:
+
+$$\delta E_\mathrm{a} = k_\mathrm{B}T^2 \sqrt{\left(\frac{\delta\sigma}{\sigma}\right)^2 + \left(\frac{\delta T}{T}\right)^2}$$
+
+#### Effective Capacitance
+For CPE elements:
+
+$$C_\mathrm{eff} = (Q R^{1-\alpha})^{1/\alpha}$$
+
+With uncertainty:
+
+$$\frac{\delta C_\mathrm{eff}}{C_\mathrm{eff}} = \sqrt{\left(\frac{\delta Q}{Q}\right)^2 + \left(\frac{1-\alpha}{\alpha}\frac{\delta R}{R}\right)^2 + \left(\frac{\ln(QR)}{\alpha^2}\delta\alpha\right)^2}$$
+
+# II. EISFitpython Implementation
+
+## Package Overview
+
+EISFitpython is a Python package for Electrochemical Impedance Spectroscopy (EIS) analysis, optimized for temperature-dependent experiments and complex circuit models. It applies a unified chi-square optimization to fit multiple impedance datasets at once, preserving inter-parameter relationships and propagating uncertainties across the full temperature range.
+
+## Key Features
+
+Accurate modeling of temperature-dependent impedance demands consistent parameter evolution. EISFitpython delivers:
+
+### Unified Optimization Framework
+
+Standard EIS workflows fit each temperature in isolation, which can produce erratic parameter trends, biased activation-energy estimates, and incomplete error analysis. EISFitpython replaces this with a single global-local optimization:
+
+- **Concurrent Dataset Fitting**  
+  Reduces parameter inconsistency by optimizing all temperatures together.  
+- **Global Parameters**  
+  Keeps temperature-independent circuit elements constant across datasets.  
+- **Local Parameters**  
+  Allows temperature-dependent elements to adapt within physical constraints.  
+- **Error Propagation**  
+  Tracks uncertainty through every temperature step.
+  
+### Advanced Analysis Capabilities
+
+- **Global-Local Parameter Classification**  
+  Automatically labels each circuit element as temperature-independent or temperature-dependent.  
+- **Unified Chi-Square Objective**  
+  Optimizes all datasets against one cost function for consistency.  
+- **Automated Classification**  
+  Detects and assigns global vs. local roles without manual intervention.  
+- **Statistical Validation**  
+  Computes confidence intervals and parameter correlations.
+
+## Citation
+
+If you use this code in your research, please cite:
+```
+S. C. Adediwura, N. Mathew, J. Schmedt auf der Günne, J. Mater. Chem. A 12 (2024) 15847–15857.
+https://doi.org/10.1039/d3ta06237f
+```
+
+# III. Getting Started
+
+## Installation
+
+### System Requirements
+- Python 3.9 or higher
+- NumPy ≥ 1.19.0
+- SciPy ≥ 1.6.0
+- Matplotlib ≥ 3.3.0
+- Pandas ≥ 1.2.0
+
+### Installation Steps
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/EISFitpython.git
+cd EISFitpython
+```
+
+2. Create and activate a virtual environment (recommended):
+```bash
+python -m venv eis_env
+source eis_env/bin/activate  # Linux/MacOS
+# or
+.\eis_env\Scripts\activate  # Windows
+```
+
+3. Install required packages:
+```bash
+pip install -r requirements.txt
+```
+
+## Core Modules Overview
+
+### 1. Circuit Module (circuit_main.py)
+
+Core module for defining and evaluating equivalent circuit models.
+
+#### Supported Circuit Elements
+
+- `R`: Resistor (Z = R)
+- `C`: Capacitor (Z = 1/jωC)
+- `L`: Inductor (Z = jωL)
+- `Q`: Constant Phase Element (Z = 1/[Q(jω)ᵅ])
+- `W`: Warburg Element (Z = σω^(-1/2)(1-j))
+- `F`: Finite-length Warburg (Z = σ·tanh(√(jωτ))/√(jωτ))
+
+#### Circuit String Syntax
+- Series connections: `+`
+- Parallel connections: `|`
+- Nested circuits: `()`
+
+Example: `"(R1|Q1)+(R2|Q2)"` represents a series combination of two parallel R-Q circuits.
+
+#### Key Functions
+
+1. `compute_impedance(params, circuit_str, freqs)`
+   - Calculates complex impedance for a given circuit
+   - Parameters: element values, circuit string, frequency points
+
+2. `Z_curve_fit(circuit_str)` 
+   - Generates fitting function for scipy.optimize.curve_fit
+   - Used internally by fitting routines
+
+### 2. Data Extraction Module (data_extraction.py)
+
+Handles importing and processing raw EIS data files with sophisticated data validation and preprocessing capabilities.
+
+#### Key Functions
+
+1. `readNEISYS(filename)`
+   - Reads NEISYS format spectrometer files
+   - Extracts metadata:
+     * Sample dimensions (diameter, thickness)
+     * Measurement conditions (temperature, voltage)
+     * Experimental parameters
+   - Returns frequency and complex impedance arrays
+   - Automatic unit conversion and validation
+
+2. `readTXT(filename)` / `readCSV(filename)`
+   - Supports multiple standard data formats:
+     * Three-column format: f, Z', Z"
+     * Four-column format: f, |Z|, φ, Z"
+     * Flexible delimiter handling
+   - Automatic format detection
+   - Data validation and consistency checks
+
+3. `trim_data(f, Z, fmin, fmax)`
+   - Advanced frequency range filtering:
+     * Linear or logarithmic range selection
+     * Automatic endpoint adjustment
+     * Data density preservation
+   - Optional noise filtering
+   - Returns filtered f, Z arrays
+   - Example:
+     ```python
+     # Trim to specific frequency range
+     f_trim, Z_trim = dt.trim_data(f, Z, 
+                                  fmin=1e-1,  # 0.1 Hz
+                                  fmax=1e6)   # 1 MHz
+     ```
+
+4. `split_array(f, Z, split_freq)`
+   - Sophisticated data segmentation:
+     * Multiple split points supported
+     * Automatic boundary handling
+     * Optional overlap regions
+   - Applications:
+     * High/low frequency analysis
+     * Process separation
+     * Electrode effects isolation
+   - Example:
+     ```python
+     # Split at 1 MHz to separate processes
+     segments, indices = dt.split_array(
+         f, Z, split_freq=1e6
+     )
+     # segments[0]: f < 1 MHz (bulk/grain)
+     # segments[1]: f > 1 MHz (electrode)
+     ```
+
+5. `get_eis_files(base_path, subfolder)`
+   - Smart file handling:
+     * Recursive directory search
+     * Pattern matching for EIS data
+     * Automatic sorting by temperature
+   - Supports multiple file formats
+   - Temperature extraction from filenames
+   - Example:
+     ```python
+     # Get temperature-series files
+     files = dt.get_eis_files(
+         base_path='EIS_Data',
+         subfolder='temp_series'
+     )
+     ```
+
+#### Data Processing Pipeline
+
+The module implements a robust data processing pipeline:
+
+1. **File Reading**
+   ```python
+   f, Z = dt.readNEISYS('sample.txt')
+   ```
+
+2. **Data Validation**
+   - Frequency monotonicity check
+   - Impedance consistency verification
+   - Missing data detection
+
+3. **Preprocessing**
+   ```python
+   # Clean and prepare data
+   f, Z = dt.trim_data(f, Z, 
+                       fmin=0.1, fmax=1e6)
+   ```
+
+4. **Advanced Processing**
+   ```python
+   # Split for multi-process analysis
+   bulk, interface = dt.split_array(f, Z, 
+                                  split_freq=1e5)
+   ```
+
+#### Best Practices
+
+1. **Data Quality**
+   - Check frequency coverage
+   - Verify impedance consistency
+   - Look for measurement artifacts
+
+2. **Preprocessing**
+   - Remove outliers
+   - Apply appropriate frequency limits
+   - Consider noise filtering
+
+3. **Data Organization**
+   - Use consistent file naming
+   - Maintain temperature series structure
+   - Document experimental conditions
+
+### 3. EIS Fitting Module (EISFit_main.py)
+
+Core fitting and analysis functionality.
+
+#### Key Functions
+
+1. `EISFit(f, Z, params, circuit, UB, LB, weight_mtd='M', method='lm', single_chi='No')`
+   - Main fitting routine
+   - Supports multiple weighting methods:
+     * 'M': Modulus weighting (|Z|)
+     * 'P': Proportional weighting
+     * 'U': Unity (no weighting)
+   - Returns optimized parameters, errors, and fit statistics
+
+2. `full_EIS_report(f, Z, params, circuit, UB, LB, weight_mtd, method, single_chi, plot_type)`
+   - Comprehensive analysis with parameter values and plots
+   - Generates Nyquist and/or Bode plots
+   - Calculates statistical metrics (χ², R², AICc)
+
+3. `plot_fit(f, Z, Z_fit, plot_type)`
+   - Visualization of experimental and fitted data
+   - Supports Nyquist, Bode, or both plot types
+   - Automatic scaling of impedance units (Ω, kΩ, MΩ, GΩ)
+
+### 4. Batch Analysis Module (EIS_Batchfit.py)
+
+Tools for analyzing multiple datasets, especially temperature-dependent studies.
+
+#### Key Functions
+
+1. `Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method)`
+   - Fits multiple datasets with same circuit model
+   - Handles temperature series data
+   - Generates combined plots and reports
+
+2. `plot_arrhenius(R_values, temp, diameter, thickness)`
+   - Arrhenius plot generation
+   - Calculates activation energies
+   - Handles multiple components (bulk, grain boundary, etc.)
+
+3. `sigma_report(R, Rerr, l, con, T)`
+   - Calculates conductivity and its uncertainty
+   - Accounts for geometric factors and measurement errors
+   - Reports temperature-dependent conductivity values with:
+     * Absolute conductivity (S/cm)
+     * Standard error
+     * Percent error
+   - Handles both single and multiple temperature points
+
+4. `C_eff(R, R_err, Q, Q_err, n, n_err, T)`
+   - Calculates effective capacitance from CPE parameters
+   - Includes error propagation
+   - Useful for analyzing non-ideal capacitive behavior
+
+### 5. Advanced Analysis Module (singlechi.py)
+
+Specialized tools for complex systems with shared parameters across multiple temperatures.
+
+#### Key Functions
+
+1. `Single_chi_report(f, Z, params, Temp, circuit_str)`
+   - Advanced fitting with global-local parameter handling:
+     * Global parameters remain constant across temperatures
+     * Local parameters vary with temperature
+   - Temperature-dependent parameter tracking
+   - Comprehensive error analysis including:
+     * Parameter correlations
+     * Standard errors
+     * Chi-square statistics
+   
+2. `flatten_params(params, circuit_str, N_sub)`
+   - Sophisticated parameter management for complex fits
+   - Handles mixed global/local parameters:
+     * For global parameters: single value used across all temperatures
+     * For local parameters: array of values [T₁, T₂, ..., Tₙ]
+   - Automatic parameter validation and structure verification
+   - Example usage:
+     ```python
+     # Mixed global-local parameter structure
+     params = (
+         [R1_T1, R1_T2, ..., R1_Tn],  # Local R1 values
+         Q1,                           # Global Q1 value
+         n1,                           # Global n1 value
+         [R2_T1, R2_T2, ..., R2_Tn]   # Local R2 values
+     )
+     ```
+
+3. `Single_chi(f, *params, circuit_str, circuit_type)`
+   - Core computation engine for impedance calculation
+   - Handles parameter distribution across temperature points
+   - Supports both fitting and prediction modes
+   - Automatically manages parameter structure based on temperature points
+
+#### Example Usage with Temperature-Dependent Analysis
+```python
+import singlechi as sc
+import numpy as np
+
+# Temperature points (in Celsius)
+temps = np.array([140, 150, 160, 170, 180, 190, 200])
+
+# Define parameters with temperature dependence
+circuit = "(R1|Q1)+(R2|Q2)"
+params = (
+    R1_values,  # Array of R1 values for each temperature
+    Q1,         # Global Q1 (temperature-independent)
+    n1,         # Global n1 (temperature-independent)
+    R2_values,  # Array of R2 values for each temperature
+    Q2,         # Global Q2
+    n2          # Global n2
+)
+
+# Perform analysis
+results = sc.Single_chi_report(f, Z, params, temps, circuit)
+```
+
+The module handles complex parameter relationships:
+- Resistance values (R) typically show temperature dependence
+- CPE parameters (Q, n) often remain constant across temperatures
+- Automatic handling of parameter interdependencies
+- Built-in correlation analysis between parameters
+
+
+
+
+## Quick Start Guide
+
+### 1. Basic Circuit Simulation
+```python
+import EISFit_main as em
+
+# Define a simple RC circuit
+circuit = "(R1|C1)"
+params = [100, 1e-6]  # R = 100 Ω, C = 1 µF
+freqs = np.logspace(-2, 6, 50)  # 0.01 Hz to 1 MHz
+
+# Generate simulated data
+Z = em.predict_Z(freqs[0], freqs[-1], len(freqs), params, circuit)
+```
+
+### 2. Loading and Fitting Real Data
+```python
+import data_extraction as dt
+
+# Load EIS data
+f, Z = dt.readNEISYS('my_data.txt')
+
+# Define circuit and initial parameters
+circuit = "(R1|Q1)+R2"
+params = [1e5, 1e-9, 0.8, 50]  # R1, Q1, n1, R2
+UB = [1e6, 1e-6, 1, 100]      # Upper bounds
+LB = [1e4, 1e-12, 0.5, 10]    # Lower bounds
+
+# Perform fitting
+popt, perror = em.full_EIS_report(
+    f, Z, params, circuit, 
+    UB=UB, LB=LB,
+    weight_mtd='M',      # Modulus weighting
+    method='lm',         # Levenberg-Marquardt algorithm
+    single_chi='No',
+    plot_type='both'     # Generate both Nyquist and Bode plots
+)
+```
+
+### 3. Temperature-Dependent Analysis
+```python
+import EIS_Batchfit as ebf
+
+# Load multiple temperature datasets
+files = dt.get_eis_files(base_path='EIS_Data', subfolder='temp_series')
+temps = np.array([25, 50, 75, 100])  # °C
+
+# Perform batch fitting
+fit_params, fit_errors = ebf.Batch_fit(
+    files, params, circuit, temps,
+    UB, LB, weight_mtd='M', method='lm'
+)
+
+# Generate Arrhenius plot
+D = 1.3    # Sample diameter (cm)
+L = 0.2    # Sample thickness (cm)
+ebf.plot_arrhenius(fit_params[:,0], temps, D, L, labels='Bulk')
+```
+
+## Cross-References: Theory to Implementation
+
+### Complex Nonlinear Least-Squares (CNLS) Implementation
+The theoretical CNLS framework (Section I) is implemented in `EISFit_main.py`:
+- Sum of squares function → `EISFit()` method
+- Weighting schemes → `weight_mtd` parameter
+- Error analysis → Integrated in `fit_report()`
+
+### Circuit Elements and Physical Models
+Each theoretical element (Section I) has its impedance calculation in `circuit_main.py`:
+```python
+# Example: CPE implementation
+Z_CPE = 1.0 / (Q * (1j * w) ** n)  # Maps to theoretical equation Z_CPE = 1/[Q(jω)ᵅ]
+```
+
+### Statistical Analysis Implementation
+Error metrics (Section I) are computed in various modules:
+- Chi-square → `EISFit()` in EISFit_main.py
+- Standard errors → Parameter covariance matrix calculation
+- Correlation matrix → Generated in `fit_report()`
+
+### Physical Property Calculations
+Advanced analyses map to physical properties:
+- Conductivity calculations → `sigma_report()` in EIS_Batchfit.py
+- Activation energy → Arrhenius plot analysis
+- Effective capacitance → `C_eff()` implementation
+
+
+
+## Common Error Messages
+
+1. Invalid Circuit String:
+   - Check element numbering (R1, R2, etc.)
+   - Verify parentheses matching
+   - Ensure valid operators (+, |)
+
+2. Parameter Count Mismatch:
+   - Count elements in circuit string
+   - Remember CPE needs 2 parameters (Q, n)
+   - Check temperature point count for batch analysis
+
+3. Convergence Failures:
+   - Try different initial parameters
+   - Check parameter bounds
+   - Verify data quality
+   - Consider simpler circuit model
+
+4. File Format Errors:
+   - Verify column structure
+   - Check for header presence/format
+   - Ensure valid numeric data
+
+## Best Practices
+
+1. Data Preparation:
+   - Clean data of outliers
+   - Use trim_data() for focused analysis
+   - Check frequency range coverage
+
+2. Circuit Model Selection:
+   - Start simple, add complexity as needed
+   - Validate with physical meaning
+   - Check parameter uncertainties
+
+3. Fitting Strategy:
+   - Use reasonable initial guesses
+   - Set appropriate parameter bounds
+   - Try different weighting methods
+   - Validate results with multiple plots
+
+4. Temperature Analysis:
+   - Ensure consistent sample geometry
+   - Use proper temperature units
+   - Validate Arrhenius behavior
+   - Check activation energy
+
+## Example Usage
+
+See Example_scripts/ directory for detailed examples:
+- Example1-simulate.py: Circuit simulation
+- Example2a/b/c-EISfit.py: Single temperature fitting
+- Example3-Batchfit.py: Temperature series analysis
+- Example4-Singlechi.py: Advanced parameter sharing
