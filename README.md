@@ -75,7 +75,7 @@ $$S = \sum_{i=1}^{N} \{w_i[\mathrm{Re}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Re}Z_
 Where:
 - $Z_i^\mathrm{EXP}$ and $Z_i^\mathrm{TH}$ represent experimental and theoretical impedance respectively
 - Re and Im denote real and imaginary components
-- $w_i^\mathrm{RE}$ and $w_i^\mathrm{IM}$ are weighting factors for real and imaginary components
+- $w_i$ and $w_i$ are weighting factors for real and imaginary components
 
 ### Weighting Methods
 
@@ -94,7 +94,7 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
    - Useful when uncertainties scale with impedance magnitude
 
 3. **Modulus Weighting**
-   $$w_i^\mathrm{RE} = w_i^\mathrm{IM} = \frac{1}{|Z_i|^2}$$
+   $$w_i= \frac{1}{|Z_i|^2}$$
    - Balances contributions from small and large impedances
    - Provides equal statistical weight to real and imaginary components
    - Recommended for typical EIS measurements
@@ -115,7 +115,6 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
 1. Clone the repository:
 ```bash
 git clone https://github.com/Sheyigold/EISFitpython.git
-cd EISFitpython
 ```
 
 2. Install required packages:
@@ -183,24 +182,7 @@ Handles importing and processing raw EIS data files with sophisticated data vali
                                   fmax=1e6)   # 1 MHz
      ```
 
-4. `split_array(f, Z, split_freq)`
-   - Sophisticated data segmentation:
-     * Multiple split points supported
-     * Automatic boundary handling
-     * Optional overlap regions
-   - Applications:
-     * Needed for single chi anaylsis.
-   - Example:
-     ```python
-     # Split at 1 MHz to separate processes
-     segments, indices = dt.split_array(
-         f, Z, split_freq=1e6
-     )
-     # segments[0]: f < 1 MHz (bulk/grain)
-     # segments[1]: f > 1 MHz (electrode)
-     ```
-
-5. `get_eis_files(base_path, subfolder)`
+4. `get_eis_files(base_path, subfolder)`
    - Smart file handling:
      * Recursive directory search
      * Pattern matching for EIS data
