@@ -70,7 +70,7 @@ $$S = \sum_{i=1}^{m} w_i[f_i^\mathrm{EXP}(x_i) - f_i^\mathrm{TH}(x, P)]^2$$
 
 For EIS data over frequency range $\omega_i$:
 
-$$S = \sum_{i=1}^{N} \{w_i^\mathrm{RE}[\mathrm{Re}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Re}Z_i^\mathrm{TH}(\omega_i, P)]^2 + w_i^\mathrm{IM}[\mathrm{Im}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Im}Z_i^\mathrm{TH}(\omega_i, P)]^2\}$$
+$$S = \sum_{i=1}^{N} \{w_i[\mathrm{Re}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Re}Z_i^\mathrm{TH}(\omega_i, P)]^2 + w_i[\mathrm{Im}Z_i^\mathrm{EXP}(\omega_i) - \mathrm{Im}Z_i^\mathrm{TH}(\omega_i, P)]^2\}$$
 
 Where:
 - $Z_i^\mathrm{EXP}$ and $Z_i^\mathrm{TH}$ represent experimental and theoretical impedance respectively
@@ -98,37 +98,6 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
    - Balances contributions from small and large impedances
    - Provides equal statistical weight to real and imaginary components
    - Recommended for typical EIS measurements
-
-### Statistical Analysis and Error Propagation
-
-#### Chi-Square Analysis
-The reduced chi-square ($\chi_r^2$) is calculated as:
-
-$$\chi_r^2 = \frac{1}{2N - n_p} \sum_{i=1}^N \left[\frac{(Z'_{\mathrm{exp},i} - Z'_{\mathrm{fit},i})^2}{\sigma_{Z',i}^2} + \frac{(Z''_{\mathrm{exp},i} - Z''_{\mathrm{fit},i})^2}{\sigma_{Z'',i}^2}\right]$$
-
-where:
-- N is the number of data points
-- n_p is the number of fitting parameters
-- $\sigma_{Z',i}$ and $\sigma_{Z'',i}$ are uncertainties in real and imaginary components
-
-#### Activation Energy Analysis
-The Arrhenius equation for conductivity:
-
-$$\sigma(T) = \frac{\sigma_0}{T} \exp\left(-\frac{E_\mathrm{a}}{k_\mathrm{B}T}\right)$$
-
-Error propagation in activation energy:
-
-$$\delta E_\mathrm{a} = k_\mathrm{B}T^2 \sqrt{\left(\frac{\delta\sigma}{\sigma}\right)^2 + \left(\frac{\delta T}{T}\right)^2}$$
-
-#### Effective Capacitance
-For CPE elements:
-
-$$C_\mathrm{eff} = (Q R^{1-\alpha})^{1/\alpha}$$
-
-With uncertainty:
-
-$$\frac{\delta C_\mathrm{eff}}{C_\mathrm{eff}} = \sqrt{\left(\frac{\delta Q}{Q}\right)^2 + \left(\frac{1-\alpha}{\alpha}\frac{\delta R}{R}\right)^2 + \left(\frac{\ln(QR)}{\alpha^2}\delta\alpha\right)^2}$$
-
 
 # II. Getting Started
 
