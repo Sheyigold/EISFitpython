@@ -311,13 +311,20 @@ Z = em.predict_Z(freqs[0], freqs[-1], len(freqs), params, circuit)
 import data_extraction as dt
 
 # Load EIS data
+# NEISYS spectrometer files
 f, Z = dt.readNEISYS('my_data.txt')
+
+#.txt file without headers and tab separated, three-column format: f, Z', Z"
+f, Z = dt.readTXT('my_data.txt')
+
+#.csv file without headers, three-column format: f, Z', Z"
+f, Z = dt.readCSV('my_data.txt')
 
 # Define circuit and initial parameters
 circuit = "(R1|Q1)+R2"
 params = [1e5, 1e-9, 0.8, 50]  # R1, Q1, n1, R2
-UB = [1e6, 1e-6, 1, 100]      # Upper bounds
-LB = [1e4, 1e-12, 0.5, 10]    # Lower bounds
+UB = []      # Upper bounds
+LB = []    # Lower bounds
 
 # Perform fitting
 popt, perror = em.full_EIS_report(
@@ -342,8 +349,7 @@ temps = np.array([25, 50, 75, 100])  # °C
 circuit_str = "(R1|Q1)+Q2"
 
 # Initial parameter guesses for the circuit model
-params = [1.8e6, 1.3e-11, 0.9, 5.7e-7, 0.6]
-# Parameters order: [R1, Q1,n1, Q2, n2]
+params = [R1, Q1,n1, Q2, n2]
 
 # Perform batch fitting
 fit_params, fit_errors = ebf.Batch_fit(
