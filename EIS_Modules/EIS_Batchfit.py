@@ -404,7 +404,7 @@ def sigma_report(R, Rerr, l, con, T):
             percent_error = (err / sigma_val) * 100 if sigma_val != 0 else float('inf')
             print(f" Sigma_@ {temp}ºC = {float(sigma_val)}   +/-  {float(err)}    {percent_error:.4f}  ")
     
-def C_eff(R, R_err, Q, Q_err, n, n_err, T):
+def C_eff(R, dR, Q, dQ, n, dn, T):
     """
     Calculate effective capacitance from constant phase element parameters.
 
@@ -412,15 +412,15 @@ def C_eff(R, R_err, Q, Q_err, n, n_err, T):
     -----------
     R : float or array-like
         Resistance values in ohms
-    R_err : float or array-like
+    dR : float or array-like
         Resistance error values
     Q : float or array-like
         CPE coefficient values
-    Q_err : float or array-like
+    dQ : float or array-like
         CPE coefficient error values 
     n : float or array-like
         CPE exponent values
-    n_err : float or array-like
+    dn : float or array-like
         CPE exponent error values
     T : float or array-like
         Temperature values in Celsius
@@ -436,16 +436,26 @@ def C_eff(R, R_err, Q, Q_err, n, n_err, T):
     """
     # Ensure inputs are numpy arrays for element-wise operations
     R = np.atleast_1d(R)
-    R_err = np.atleast_1d(R_err)
+    dR = np.atleast_1d(dR)
     Q = np.atleast_1d(Q)
-    Q_err = np.atleast_1d(Q_err)
+    dQ = np.atleast_1d(dQ)
     n = np.atleast_1d(n)
-    n_err = np.atleast_1d(n_err)
+    dn = np.atleast_1d(dn)
     T = np.atleast_1d(T)
     
     # Compute effective capacitance and its error
     C = (Q * R**(1 - n))**(1 / n)
-    C_err = C * ((Q_err / Q) + (n_err / n) + (R_err / R))
+
+    #Propagate uncertainties via the power-law log-based formula:
+    # Terms for relative contributions
+    term_Q = (1.0 / n) * (dQ / Q)
+    term_R = ((1.0 - n) / n) * (dR / R)
+    term_n = (np.log(Q * R**(1 - n)) / n**2) * dn
+    
+    # Combined relative error
+    rel_error = np.sqrt(term_Q**2 + term_R**2 + term_n**2)
+
+    C_err= C * rel_error
     
     print('                    Effective capacitance               Stderr               % errors')
     print('========================================================================================')
