@@ -404,7 +404,7 @@ def sigma_report(R, Rerr, l, con, T):
             percent_error = (err / sigma_val) * 100 if sigma_val != 0 else float('inf')
             print(f" Sigma_@ {temp}ºC = {float(sigma_val)}   +/-  {float(err)}    {percent_error:.4f}  ")
     
-def C_eff(R, dR, Q, dQ, n, dn, T):
+def C_eff(R, R_err, Q, Q_err, n, n_err, T):
     """
     Calculate effective capacitance from constant phase element parameters.
 
@@ -412,15 +412,15 @@ def C_eff(R, dR, Q, dQ, n, dn, T):
     -----------
     R : float or array-like
         Resistance values in ohms
-    dR : float or array-like
+    R_err : float or array-like
         Resistance error values
     Q : float or array-like
         CPE coefficient values
-    dQ : float or array-like
+    Q_err : float or array-like
         CPE coefficient error values 
     n : float or array-like
         CPE exponent values
-    dn : float or array-like
+    n_err : float or array-like
         CPE exponent error values
     T : float or array-like
         Temperature values in Celsius
@@ -436,26 +436,16 @@ def C_eff(R, dR, Q, dQ, n, dn, T):
     """
     # Ensure inputs are numpy arrays for element-wise operations
     R = np.atleast_1d(R)
-    dR = np.atleast_1d(dR)
+    R_err = np.atleast_1d(R_err)
     Q = np.atleast_1d(Q)
-    dQ = np.atleast_1d(dQ)
+    Q_err = np.atleast_1d(Q_err)
     n = np.atleast_1d(n)
-    dn = np.atleast_1d(dn)
+    n_err = np.atleast_1d(n_err)
     T = np.atleast_1d(T)
     
     # Compute effective capacitance and its error
     C = (Q * R**(1 - n))**(1 / n)
-
-    #Propagate uncertainties via the power-law log-based formula:
-    # Terms for relative contributions
-    term_Q = (1.0 / n) * (dQ / Q)
-    term_R = ((1.0 - n) / n) * (dR / R)
-    term_n = (np.log(Q * R**(1 - n)) / n**2) * dn
-    
-    # Combined relative error
-    rel_error = np.sqrt(term_Q**2 + term_R**2 + term_n**2)
-
-    C_err= C * rel_error
+    C_err = C * ((Q_err / Q) + (n_err / n) + (R_err / R))
     
     print('                    Effective capacitance               Stderr               % errors')
     print('========================================================================================')
@@ -467,8 +457,6 @@ def C_eff(R, dR, Q, dQ, n, dn, T):
     if C.size == 1:
         return C[0], C_err[0]
     return C, C_err
-
-   
 
 def Cap(C, C_err, T):
     """
