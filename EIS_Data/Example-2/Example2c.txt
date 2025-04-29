@@ -1,4 +1,4 @@
-s04147_in-situ_NMR-EIS-120deg
+s04147-120deg
 Fixed value(s) :  AC Volt  [Vrms]=3.5000e-02  
    Freq.[Hz]   	Zs'[ohm]  	Zs''[ohm]
  1.00000e+06	 1.73627e+04	-6.88145e+04
