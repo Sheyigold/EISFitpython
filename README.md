@@ -338,6 +338,13 @@ import EIS_Batchfit as ebf
 files = dt.get_eis_files(base_path='EIS_Data', subfolder='temp_series')
 temps = np.array([25, 50, 75, 100])  # °C
 
+# Equivalent circuit model
+circuit_str = "(R1|Q1)+(R2|Q2)"
+
+# Initial parameter guesses for the circuit model
+params = [1.8e6, 1.3e-11, 0.9,8.2e6, 1.3e-9,0.9, 5.7e-7, 0.6]
+# Parameters order: [R1, Q1,n1, R2, Q1, n1, Q2, n2]
+
 # Perform batch fitting
 fit_params, fit_errors = ebf.Batch_fit(
     files, params, circuit, temps,
@@ -352,11 +359,24 @@ ebf.plot_arrhenius(fit_params[:,0], temps, D, L, labels='Bulk')
 
 ### 4. Temperature-Dependent Analysis using Global-Local Optimization Strategy
 ```python
-import singlechi as sc
+import data_extraction as dt     # For data file handling
+import singlechi as sc          # For single chi analysis
+import EIS_Batchfit as ebf      # For batch fitting
 import numpy as np
 
+#%% Data Processing
+# Get EIS data files
+filenames=dt.get_eis_files(base_path='../EIS_Data', subfolder='Example-3-4')
+
+# Extract frequency and impedance data from NEISYS spectrometer files
+f, Z = dt.full_readNEISYS(filenames)
+
+# Split data at 1MHz frequency point
+sublist, _ = dt.split_array(f, Z=None, split_freq=1e6)
+N_sub = len(sublist)
+
 # Temperature points (in Celsius)
-temps = np.array([140, 150, 160, 170, 180, 190, 200])
+temps = np.array([140, 150, 160, 170, 180])
 
 # Define parameters with temperature dependence
 circuit = "(R1|Q1)+(R2|Q2)"
