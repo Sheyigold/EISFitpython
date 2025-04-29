@@ -1,4 +1,4 @@
-s04147_ex-situ_EIS-200deg
+s04147-200deg
 Fixed value(s) :  AC Volt  [Vrms]=3.5000e-02  
    Freq.[Hz]   	Zs'[ohm]  	Zs''[ohm]
  1.00000e+06	 1.58596e+04	-1.83471e+04
