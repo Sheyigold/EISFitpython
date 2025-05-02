@@ -459,7 +459,7 @@ See Example_scripts/ directory for detailed examples:
 - Example1-simulate.py: Circuit simulation
 - Example2a/b/c-EISfit.py: Single temperature fitting
 - Example3-Batchfit.py: Temperature series analysis
-- Example4-Singlechi.py: Advanced parameter sharing
+- Example4-Singlechi.py: Global-local optimization with one cost function
 
 
 ---
