@@ -110,14 +110,13 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
 - Matplotlib ≥ 3.3.0
 - Pandas ≥ 1.2.0
 
-### Installation Steps
-
-1. Clone the repository:
+### Platform Independent Installation Steps
+Eisfitpython is available for installation via the Python Package Index. 
+The latest release version can be installed using:
 ```bash
-git clone https://github.com/Sheyigold/EISFitpython.git
-```
+python -m pip install eisfitpython
 
-2. Install required packages:
+### Install required packages:
 ```bash
 pip install -r requirements.txt
 ```
@@ -192,10 +191,11 @@ Handles importing and processing raw EIS data files with sophisticated data vali
    - Example:
      ```python
      # Get temperature-series files
-     files = dt.get_eis_files(
-         base_path='EIS_Data',
-         subfolder='temp_series'
-     )
+
+     #if subfolder is not None
+      files = dt.get_eis_files(base_path='base folder', subfolder='temp_series')
+      #else 
+      files = dt.get_eis_files(base_path='basefolder')
      ```
 
 ### 3. EIS Fitting Module (EISFit_main.py)
@@ -308,7 +308,9 @@ Z = em.predict_Z(freqs[0], freqs[-1], len(freqs), params, circuit)
 
 ### 2. Loading and Fitting Real Data
 ```python
-import data_extraction as dt
+
+# Import custom EIS modules
+from EISFitpython import data_extraction as dt     
 
 # Load EIS data
 # NEISYS spectrometer files
@@ -318,7 +320,7 @@ f, Z = dt.readNEISYS('my_data.txt')
 f, Z = dt.readTXT('my_data.txt')
 
 #.csv file without headers, three-column format: f, Z', Z"
-f, Z = dt.readCSV('my_data.txt')
+f, Z = dt.readCSV('my_data.csv')
 
 # Define circuit and initial parameters
 circuit = "(R1|Q1)+R2"
@@ -339,10 +341,15 @@ popt, perror = em.full_EIS_report(
 
 ### 3. Temperature-Dependent Analysis
 ```python
-import EIS_Batchfit as ebf
+# Import custom EIS modules
+from EISFitpython import data_extraction as dt          
+from EISFitpython import EIS_Batchfit as ebf 
 
 # Load multiple temperature datasets
-files = dt.get_eis_files(base_path='EIS_Data', subfolder='temp_series')
+#if subfolder is not None
+files = dt.get_eis_files(base_path='base folder', subfolder='temp_series')
+
+
 temps = np.array([25, 50, 75, 100])  # °C
 
 # Equivalent circuit model
@@ -365,9 +372,11 @@ ebf.plot_arrhenius(fit_params[:,0], temps, D, L, labels='Bulk')
 
 ### 4. Temperature-Dependent Analysis using Global-Local Optimization Strategy
 ```python
-import data_extraction as dt     # For data file handling
-import singlechi as sc          # For single chi analysis
-import EIS_Batchfit as ebf      # For batch fitting
+# Import custom EIS modules
+from EISFitpython import data_extraction as dt     
+from EISFitpython import singlechi as sc           
+from EISFitpython import EISFit_main as em      
+from EISFitpython import EIS_Batchfit as ebf 
 import numpy as np
 
 #%% Data Processing
@@ -375,10 +384,11 @@ import numpy as np
 filenames=dt.get_eis_files(base_path='../EIS_Data', subfolder='temp_series')
 
 # Extract frequency and impedance data from NEISYS spectrometer files
-f, Z = dt.full_readNEISYS(filenames)
+
+f, Z = dt.stack_NEISYS_files(filenames)
 
 # Split data at 1MHz frequency point
-sublist, _ = dt.split_array(f, Z=None, split_freq=1e6)
+sublist, _ = dt.split_array(f, Z=None, split_freq=np.max(f))
 N_sub = len(sublist)
 
 # Temperature points (in Celsius)
@@ -396,7 +406,7 @@ params = (
 )
 
 # Perform analysis
-results = sc.Single_chi_report(f, Z, params, temps, circuit)
+fit_params, fit_perror, Z_fit = sc.Single_chi_report(f, Z, params, Temp, circuit_str,weight_mtd='M')
 ```
 
 The module handles complex parameter relationships:
@@ -405,29 +415,6 @@ The module handles complex parameter relationships:
 - Automatic handling of parameter interdependencies
 - Built-in correlation analysis between parameters
 
-
-## Common Error Messages
-
-1. Invalid Circuit String:
-   - Check element numbering (R1, R2, etc.)
-   - Verify parentheses matching
-   - Ensure valid operators (+, |)
-
-2. Parameter Count Mismatch:
-   - Count elements in circuit string
-   - Remember CPE needs 2 parameters (Q, n)
-   - Check temperature point count for batch analysis
-
-3. Convergence Failures:
-   - Try different initial parameters
-   - Check parameter bounds
-   - Verify data quality
-   - Consider simpler circuit model
-
-4. File Format Errors:
-   - Verify column structure
-   - Check for header presence/format
-   - Ensure valid numeric data
 
 ## Recommendation 
 
