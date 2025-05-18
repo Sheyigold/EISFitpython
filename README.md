@@ -111,12 +111,12 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
 - Pandas ≥ 1.2.0
 
 ### Platform Independent Installation Steps
-Eisfitpython is available for installation via the Python Package Index. 
-The latest release version can be installed using:
+Download the latest release from the GitHub Releases page, then install it with pip:
 
 ```bash
-
-python -m pip install eisfitpython
+python -m pip install eisfitpython-<version>.tar.gz
+# or, if you downloaded a wheel:
+python -m pip install eisfitpython-<version>-py3-none-any.whl
 ```
 
 ### Install required packages:
