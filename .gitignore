@@ -1,0 +1,38 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+
+# VSCode or PyCharm project files
+.vscode/
+.idea/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Build/dist artifacts
+build/
+dist/
+*.egg-info/
+test/
+
+# Logs and data
+*.log
+*.tsv
+*.xlsx
+*.dat
+*.out
+*.toml
+
+# Installer artifacts
+pip-wheel-metadata/
