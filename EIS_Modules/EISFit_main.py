@@ -37,8 +37,11 @@ from io import StringIO
 
 
 #Custom libraries 
-from EISFitpython import circuit_main as Eqc
-from EISFitpython import data_extraction as dt
+# EIS Modules
+import EISFit_main as fit 
+import data_extraction as dt 
+import circuit_main as Eqc
+
 
 
 
