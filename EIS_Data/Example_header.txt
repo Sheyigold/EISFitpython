@@ -1,8 +1,6 @@
 # Start Frequency (Hz): 0.003
 # End Frequency (Hz): 10000000.0
 # Number of Points: 50
-# Circuit Model: (R1|Q1)+(R2|Q2)+L1+W1
-# Parameters: 50000000.0, 2e-12, 0.85, 80000000.0, 4e-10, 0.75, 0.0025, 10000000.0
 
 Freq.[Hz]		 Zs'[ohm] 		 Zs''[ohm]
 1.000000e+07	3.032358e+04	3.829188e+04

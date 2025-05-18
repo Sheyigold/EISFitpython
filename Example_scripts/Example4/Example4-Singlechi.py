@@ -12,11 +12,13 @@ import sys
 import os
 import numpy as np
 
+
 # Import custom EIS modules
 from EISFitpython import data_extraction as dt     
 from EISFitpython import singlechi as sc           
 from EISFitpython import EISFit_main as em      
 from EISFitpython import EIS_Batchfit as ebf    
+
 #%% Data Processing
 # Get EIS data files
 filenames=dt.get_eis_files(base_path='../../EIS_Data', subfolder='Example-3-4')
@@ -31,6 +33,9 @@ N_sub = len(sublist)
 # Temperature points for measurements (in Celsius)
 Temp = np.array([140, 150, 160, 170, 180, 190, 200])
 
+# Generate plot for the selected files
+# Plotting options: 'nyquist', 'bode', or 'both'
+a=em.plot_fit(f, Z,plot_type='both')
 #%% Fitting Parameters
 # Equivalent circuit model
 circuit_str = "(R1|Q1)+(R2|Q2)+Q3"  
@@ -108,5 +113,5 @@ gb_C, gb_C_err = results[1]
 
 
 # %%
-a=em.plot_fit(f, Z,plot_type='both')
+
 # %%

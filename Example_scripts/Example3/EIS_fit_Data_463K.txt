@@ -2,7 +2,7 @@
 # Temperature: 190°C
 # Frequency Range: 4.58e-02 - 1.00e+06 Hz
 # Circuit Model: (R1|Q1)+(R2|Q1)+Q2
-Freq.[Hz]		 Zs'[ohm] 		 Zs''[ohm]
+Freq.[Hz]		Zs'[ohm]		Zs''[ohm]
 1.000000e+06	1.748425e+04	-2.239325e+04
 6.554100e+05	2.319877e+04	-2.697903e+04
 4.295700e+05	2.989709e+04	-3.257738e+04

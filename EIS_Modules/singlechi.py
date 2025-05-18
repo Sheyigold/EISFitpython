@@ -38,8 +38,7 @@ from io import StringIO
 #Custom libraries 
 from EISFitpython import EISFit_main as fit 
 from EISFitpython import data_extraction as dt 
-from EISFitpython import circuit_main as ct 
-
+from EISFitpython import circuit_main as ct
 
 # Function to flatten parameters for circuit fitting
 def flatten_params(params, circuit_str=None, N_sub=None):
@@ -464,7 +463,7 @@ def Single_chi_report(f, Z, params, Temp, circuit_str, weight_mtd='M'):
         
         print("\nFitted data files saved:")
         for i in range(N_sub):
-            print(f"Temperature {Temp[i]}°C: {os.path.abspath(f'S-chi_fit_data_{circuit_str}_{Temp[i]}C.txt')}")
+            print(f"Temperature {Temp[i]}°C: {os.path.abspath(f'S-chi_fit_data_{Temp[i]}C.txt')}")
      
         # Generate and save plots
         figN, figB = generate_plots(f, Z, Z_fit, Temp)
