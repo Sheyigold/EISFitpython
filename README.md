@@ -113,8 +113,11 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
 ### Platform Independent Installation Steps
 Eisfitpython is available for installation via the Python Package Index. 
 The latest release version can be installed using:
+
 ```bash
+
 python -m pip install eisfitpython
+```
 
 ### Install required packages:
 ```bash
