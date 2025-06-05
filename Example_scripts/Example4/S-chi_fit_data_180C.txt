@@ -1,8 +1,7 @@
 # Single Chi-Square Fitted Data
 # Temperature: 180°C
 # Frequency Range: 4.58e-02 - 1.00e+06 Hz
-
-Freq.[Hz]	 Zs'[ohm] 	 Zs''[ohm]
+# Freq.[Hz]	 Zs'[ohm] 	 Zs''[ohm]
 1.000000e+06	1.914101e+04	-2.767634e+04
 6.554100e+05	2.638210e+04	-3.365536e+04
 4.295700e+05	3.472384e+04	-4.056317e+04
