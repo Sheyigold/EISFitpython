@@ -16,10 +16,8 @@ import numpy as np
 
 
 # Import custom EIS modules
-from EISFitpython import data_extraction as dt      # type: ignore # For data file handling
-from EISFitpython import EIS_Batchfit as ebf      # type: ignore # For batch fitting
-
-
+from EISFitpython import data_extraction as dt         
+from EISFitpython import EIS_Batchfit as ebf  
 
 # import EIS data files
 filenames=dt.get_eis_files(base_path='../../EIS_Data', subfolder='Example-3-4')
@@ -36,7 +34,7 @@ a=ebf.Nyq_stack_plot(filenames, Temp)
 # Define the equivalent circuit model for fitting
 circuit = "(R1|Q1)+(R2|Q1)+Q2"
 # Circuit components:
-# - R1|C1: Parallel combination of resistance and capacitance (bulk response)
+# - R1|Q1: Parallel combination of resistance and constant phase element  (bulk response)
 # - R2|Q1: Parallel combination of resistance and constant phase element (grain boundary)
 # - Q2: Series constant phase element (electrode response)
 
@@ -65,10 +63,9 @@ fit_params, fit_perror = ebf.Batch_fit(filenames, params, circuit,  Temp, UB, LB
 # %%
 # Extract fitted resistance parameters for different components
 Rb = fit_params[:,0]  # Bulk resistance from first column
-Rb_err = fit_perror[:, 0]  # Error in bulk resistance from first column
 Rgb = fit_params[:,3]  # Grain boundary resistance from third column
-Rgb_err = fit_perror[:, 3]  # Error in grain boundary resistance from third column
-
+Rb_err = fit_perror[:,0]  # Error in bulk resistance from first column
+Rgb_err = fit_perror[:,3]  # Error in grain boundary resistance from third column
 # Sample geometry parameters for conductivity calculations
 D = 0.8  # Pellet diameter in cm 
 l = 0.21  # Pellet thickness in cm
@@ -76,21 +73,18 @@ l = 0.21  # Pellet thickness in cm
 # Calculate total resistance
 Rt = Rb + Rgb  # Sum of bulk and grain boundary resistances
 Rt_err = np.sqrt(Rb_err**2 + Rgb_err**2)  # Error in total resistance
-
-
 # Temperature points for Arrhenius plot (in Celsius)
 T = np.array([140, 150, 160, 170, 180, 190, 200])
 # For multiple components:
 R_values = [Rb, Rgb, Rt]
-R_errors = [Rb_err, Rgb_err, Rt_err]
 labels = ['Bulk', 'Gb', 'Total']
-conductivities = ebf.plot_arrhenius(R_values, R_errors, T, D, l, labels=labels)
-
-
+R_errors = [Rb_err, Rgb_err, Rt_err]
+conductivities, conductivity_errors = ebf.plot_arrhenius(R_values,R_errors, T, D, l, labels=labels)
 # For single component:
-#ax, conductivities = ebf.plot_arrhenius(Rb,Rb_err T, D, l, labels='Bulk')
+#ax, conductivities = ebf.plot_arrhenius(Rb, T, D, l, labels='Bulk')
 
 # %%
+
 #Effective Capacitance Calculation
 # For CPE elements, calculate the effective capacitance using:
 #   C_eff = (R^(1-n) * Q)^(1/n)

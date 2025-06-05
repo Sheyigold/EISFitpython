@@ -25,6 +25,7 @@ build/
 dist/
 *.egg-info/
 test/
+.git/
 
 # Logs and data
 *.log

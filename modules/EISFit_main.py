@@ -110,7 +110,7 @@ def predict_Z(start_freq, end_freq, no_points, params, circuit_str):
                 file.write(f"# Number of Points: {no_points}\n")
                 file.write(f"# Circuit Model: {circuit_str}\n")
                 file.write(f"# Parameters: {', '.join(map(str, params))}\n")
-                file.write("\nFreq.[Hz]\t\t Zs'[ohm] \t\t Zs''[ohm]\n")
+                file.write(f"# Freq.[Hz]\t\t Zs'[ohm] \t\t Zs''[ohm]\n")
                 
                 # Sort data from high to low frequency
                 sorted_indices = np.argsort(f)[::-1]
@@ -660,8 +660,8 @@ def full_EIS_report(freq, Z, params, circuit, UB, LB, weight_mtd, method, single
         file.write(f"# Circuit Model: {circuit}\n")
         file.write(f"# Optimized Parameters: {', '.join(map(str, popt))}\n")
         file.write(f"# Frequency Range: {min(freq):.2e} - {max(freq):.2e} Hz\n")
-        file.write("Freq.[Hz]\t\t Zs'[ohm] \t\t Zs''[ohm]\n")  # Column headers
-        
+        file.write(f"# Freq.[Hz]\t\t Zs'[ohm] \t\t Zs''[ohm]\n")  # Column headers
+
         # Sort data from high to low frequency
         sorted_indices = np.argsort(freq)[::-1]  # Sort in descending order
         freq_sorted = freq[sorted_indices]

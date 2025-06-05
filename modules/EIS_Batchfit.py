@@ -22,13 +22,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 from io import StringIO
-import datetime
+
 
 
 #Custom libraries 
-from EISFitpython import EISFit_main as fit
+from EISFitpython import EISFit_main as fit 
+from EISFitpython import data_extraction as dt 
 from EISFitpython import circuit_main as Eqc
-from EISFitpython import data_extraction as dt
 
 
 
@@ -36,9 +36,9 @@ def Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method, single_c
     """
     Perform batch fitting of EIS data for multiple files with equivalent circuit models.
     """
+
     # Initialize main report storage
     full_report = StringIO()
-    
     try:
         # Initialize storage lists
         results = []
@@ -53,17 +53,16 @@ def Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method, single_c
             
         # Print and store batch analysis header
         header = "\n\n" + " BATCH EIS ANALYSIS REPORT ".center(70) + "\n"
-        header += "═" * 70 + f"\n\nCircuit Model: {circuit}\n" + "=" * 72
-        print(header)
-        full_report.write(header + "\n")
-
+        header += "═" * 70 + f"\n\nCircuit Model: {circuit}\n" + "=" * 72 + "\n"
+        sys.stdout.write(header)
+        sys.stdout.flush()
+        full_report.write(header)
+        
         for filename, label in zip(files, labels):
-            # Create individual report buffer
-            individual_output = StringIO()
-            sys.stdout = individual_output
-            
-            # Print individual analysis header
-            print(f"\n{label.center(70)}\n{'='*70}")
+            # Print and store individual analysis header
+            analysis_header = f"\n{label.center(70)}\n{'='*70}\n"
+            print(analysis_header, end='')  # Print to screen
+            full_report.write(analysis_header)  # Store in report
             
             # Read data file
             file_extension = os.path.splitext(filename)[1].lower()
@@ -83,19 +82,18 @@ def Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method, single_c
             else:
                 f, Z = data
             
-            # Perform fitting
+            # Perform fitting and capture output
+            fit_output = StringIO()
+            original_stdout = sys.stdout
+            sys.stdout = fit_output
             params, fit_perror = fit.fit_report(f, Z, params, circuit, UB, LB, weight_mtd, method, single_chi)
+            sys.stdout = original_stdout
             
-            # Get individual report and restore stdout
-            individual_report = individual_output.getvalue()
-            sys.stdout = sys.__stdout__
-            individual_output.close()
-            
-            # Print individual report immediately
-            print(individual_report)
-            
-            # Add to full report
-            full_report.write(individual_report)
+            # Get fit results and display/store them
+            fit_results = fit_output.getvalue()
+            fit_output.close()
+            print(fit_results, end='')  # Print to screen
+            full_report.write(fit_results)  # Store in report
             
             # Calculate fitted impedance
             Z_function = Eqc.Z_curve_fit(circuit)
@@ -112,8 +110,8 @@ def Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method, single_c
                 file.write(f"# Temperature: {T[files.index(filename)]}°C\n")
                 file.write(f"# Frequency Range: {min(f):.2e} - {max(f):.2e} Hz\n")
                 file.write(f"# Circuit Model: {circuit}\n")
-                file.write("Freq.[Hz]\t\t Zs'[ohm] \t\t Zs''[ohm]\n")  # Column headers
-                
+                file.write(f"# Freq.[Hz]\t\tZs'[ohm]\t\tZs''[ohm]\n")  # Column headers
+
                 # Sort data from high to low frequency
                 sorted_indices = np.argsort(f)[::-1]  # Sort in descending order
                 f_sorted = f[sorted_indices]
@@ -141,8 +139,9 @@ def Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method, single_c
             
             # Save plot in current directory
             cwd = os.getcwd()
-            figname = os.path.join(cwd, label)
-            figN.savefig(figname + '-Nyquist_plot.svg', bbox_inches='tight')
+            figname = os.path.join(cwd, f"{label}-Nyquist_plot.svg")
+            figN.savefig(figname, bbox_inches='tight')
+            print(f"\nNyquist plot saved to: {os.path.abspath(figname)}")
             plt.show()
             plt.close(figN)
             
@@ -162,12 +161,16 @@ def Batch_fit(files, params, circuit, Temp, UB, LB, weight_mtd, method, single_c
         ax[1].legend(prop={'size': 7})
         
         # Save Bode plot
-        bode_filename = os.path.join(cwd, f'stack-bode_plot.svg')
+        bode_filename = os.path.join(cwd, 'stack-bode_plot.svg')
         plt.savefig(bode_filename, bbox_inches='tight', dpi=300)
+        print(f"\nBode plot saved to: {os.path.abspath(bode_filename)}")
         plt.show()
         plt.close(figB)
         
     finally:
+        #print("[DEBUG] Entering finally block")
+        #print(f"[DEBUG] Current stdout in finally: {sys.stdout}")
+        
         # Get full report content
         full_report.write("\n\nAnalysis Complete\n")
         report_content = full_report.getvalue()
@@ -267,9 +270,11 @@ def Nyq_stack_plot(files, Temp):
     # Format ticks and legend
     ax.tick_params(axis='both', which='major', labelsize=10)
     ax.legend(prop={'size': 6})
+      # Save plot in current directory
+    plot_path = os.path.join(os.getcwd(), 'Nyq_stackplot.svg')
+    plt.savefig(plot_path, bbox_inches='tight', dpi=300)
     
-    # Save plot in current directory
-    plt.savefig(f'Nyq_stackplot.svg', bbox_inches='tight', dpi=300)
+    print(f"\nNyquist stack plot saved to: {os.path.abspath(plot_path)}")
     
     plt.show()
     return ax
