@@ -32,15 +32,15 @@ a=ebf.Nyq_stack_plot(filenames, Temp)
 
 #%%
 # Define the equivalent circuit model for fitting
-circuit = "(R1|Q1)+(R2|Q1)+Q2"
+circuit = "(R1|Q1)+(R2|Q2)+Q3"
 # Circuit components:
 # - R1|Q1: Parallel combination of resistance and constant phase element  (bulk response)
-# - R2|Q1: Parallel combination of resistance and constant phase element (grain boundary)
-# - Q2: Series constant phase element (electrode response)
+# - R2|Q2: Parallel combination of resistance and constant phase element (grain boundary)
+# - Q3: Series constant phase element (electrode polarisation)
 
 # Initial parameter guesses for the circuit model
 params = [1.8e6, 1.3e-11, 0.9,8.2e6, 1.3e-9,0.9, 5.7e-7, 0.6]
-# Parameters order: [R1, Q1,n1, R2, Q1, n1, Q2, n2]
+# Parameters order: [R1, Q1,n1, R2, Q2, n2, Q3, n3]
 
 # Select the weighting method for the fitting algorithm
 weight_mtd='M'
