@@ -72,7 +72,10 @@ def compute_impedance(p, circuit_str, freqs):
             return 1.0 / (params[0] * (1j * w) ** params[1])
         elif element == 'F':#Warburg elemen finite lenght
             return params[0]*np.tanh(np.sqrt(1j*w*params[1]))/np.sqrt(1j*w*params[1])
-        
+        elif element == 'G': # Gerischer Element 
+            return params[0]/ np.sqrt(1 + 1j * w * params[1])
+        elif element == 'H':# finite-length Gerischer Element 
+            return params[0] /(np.sqrt(1 + 1j * w * params[1])* np.tanh(params[2] * np.sqrt(1 + 1j * w * params[1])))
         else:
             raise ValueError(f"Unsupported element: {element}")
 
@@ -98,12 +101,15 @@ def compute_impedance(p, circuit_str, freqs):
             total_impedance, param_offset = evaluate_circuit(inner_circuit, param_offset)
         else:  # Individual components        
             # Match against R, C, L, Q, W, F elements
-            element = re.match(r'[RCLQWF]', circuit_str).group()
+            element = re.match(r'[RCLQWFGH]', circuit_str).group()
     
             # Check if the element is Q or F to extract parameters accordingly
-            if element in ['Q', 'F']:
+            if element in ['Q', 'F', 'G']:
                 params = tuple(p[param_offset:param_offset + 2])
                 param_offset += 2
+            elif element in ['H']:
+                params = tuple(p[param_offset:param_offset + 3])
+                param_offset += 3
             else:
                 params = (p[param_offset],)
                 param_offset += 1

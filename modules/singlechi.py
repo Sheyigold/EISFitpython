@@ -78,7 +78,7 @@ def flatten_params(params, circuit_str=None, N_sub=None):
     
     if circuit_str and N_sub:
         # Parse circuit elements including L, W, and F
-        elements = re.findall(r'([RQCLWF])(\d+)', circuit_str)
+        elements = re.findall(r'([RQCLWFGH])(\d+)', circuit_str)
         param_idx = 0
         
         for elem_type, elem_num in elements:
@@ -91,16 +91,21 @@ def flatten_params(params, circuit_str=None, N_sub=None):
                 validate_param(params[param_idx], elem_type, elem_num)
                 validate_param(params[param_idx + 1], f'n(Q{elem_num})', '')
                 param_idx += 2
-            elif elem_type == 'W':
-                # Warburg short needs 2 parameters (W, n)
-                validate_param(params[param_idx], elem_type, elem_num)
-                validate_param(params[param_idx + 1], f'n(W{elem_num})', '')
-                param_idx += 2
             elif elem_type == 'F':
-                # Finite length Warburg needs 3 parameters (F, n, δ)
+                # Warburg elements need 2 parameters (F, n)
                 validate_param(params[param_idx], elem_type, elem_num)
                 validate_param(params[param_idx + 1], f'n(F{elem_num})', '')
-                validate_param(params[param_idx + 2], f'δ(F{elem_num})', '')
+                param_idx += 2
+            elif elem_type == 'G':
+                # Gerischer elements need 2 parameters (G, t)
+                validate_param(params[param_idx], elem_type, elem_num)
+                validate_param(params[param_idx + 1], f't(G{elem_num})', '')
+                param_idx += 2
+            elif elem_type == 'H':
+                # Finite length Gerischer needs 3 parameters (H, t, phi)
+                validate_param(params[param_idx], elem_type, elem_num)
+                validate_param(params[param_idx + 1], f't(H{elem_num})', '')
+                validate_param(params[param_idx + 2], f'phi(H{elem_num})', '')
                 param_idx += 3
     
     # Flatten while preserving parameter structure
@@ -176,7 +181,7 @@ def format_circuit_output(popt, perror, CorrM, circuit_str, N_sub,Temp, param_te
     param_template : list
         Template indicating which parameters are per-sublist
     """
-    elements = re.findall(r'([RQCLWF])(\d+)', circuit_str)
+    elements = re.findall(r'([RQCLWFGH])(\d+)', circuit_str)
     param_labels = []
     param_values = []
     param_errors = []

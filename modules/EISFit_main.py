@@ -271,7 +271,7 @@ def EISFit(f, Z, params, circuit, UB, LB, weight_mtd='M', method='lm', single_ch
 def circuit_components(circuit_str):
         """Extract component names from the circuit string in the order they appear.
         """
-        return re.findall(r'[RCLQWF]\d+', circuit_str)
+        return re.findall(r'[RCLQWFGH]\d+', circuit_str)
 
 def fit_report(f, Z, params, circuit, UB, LB, weight_mtd, method, single_chi):
     """
@@ -303,6 +303,10 @@ def fit_report(f, Z, params, circuit, UB, LB, weight_mtd, method, single_chi):
                 n_counter += 1
             elif name.startswith('F'):
                 All_component_names.extend([f"{name}", f"{name}_n"])
+            elif name.startswith('G'):
+                All_component_names.extend([f"{name}", f"t_{name}"])
+            elif name.startswith('H'):
+                All_component_names.extend([f"{name}", f"t_{name}", f"phi_{name}"])
             else:
                 All_component_names.append(name)
                 
@@ -415,8 +419,8 @@ def nyquistPlot(ax, Z, param_dict):
     upper_limit = max(x_upper, y_upper)
 
     # Set both axis limits to the larger value
-    ax.set_xlim([-0.1, upper_limit])  # Set x-axis limits
-    ax.set_ylim([0, upper_limit])  # Set y-axis limits
+    ax.set_xlim([x_lower, upper_limit])  # Set x-axis limits
+    ax.set_ylim([y_lower, upper_limit])  # Set y-axis limits
 
     # Customize tick parameters and labels
     ax.tick_params(axis='both', which='major', labelsize=10)
