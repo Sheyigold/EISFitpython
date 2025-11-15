@@ -123,7 +123,7 @@ def Single_chi(f, *params, circuit_str, circuit_type='fit'):
     """
     Compute impedance dynamically for sublists based on a flexible circuit structure.
     """
-    sublist, _ = dt.split_array(f, Z=None, split_freq=1e6)
+    sublist, _ = dt.split_array(f, Z=None, split_freq=np.max(f))
     N_sub = len(sublist)
     
     Zs = []
@@ -300,7 +300,7 @@ def Single_chi_report(f, Z, params, Temp, circuit_str, weight_mtd='M'):
     
     try:
         # Split data into sublists
-        sublist, _ = dt.split_array(f, Z=None, split_freq=1e6)
+        sublist, _ = dt.split_array(f, Z=None, split_freq=np.max(f))
         N_sub = len(sublist)
         
         # Create parameter template
@@ -492,8 +492,8 @@ def Single_chi_report(f, Z, params, Temp, circuit_str, weight_mtd='M'):
 def generate_plots(f, Z, Z_fit, Temp):
     """Generate Nyquist and Bode plots and save them."""
     # Split frequency and impedance data for plotting
-    f_s, Z_data_s = dt.split_array(f, Z, split_freq=1e6)
-    f_s, Z_fit_s = dt.split_array(f, Z_fit, split_freq=1e6)
+    f_s, Z_data_s = dt.split_array(f, Z, split_freq=np.max(f))
+    f_s, Z_fit_s = dt.split_array(f, Z_fit, split_freq=np.max(f))
     
    # Save plot in current directory
     cwd = os.getcwd()
