@@ -27,7 +27,7 @@ filenames=dt.get_eis_files(base_path='../../EIS_Data', subfolder='Example-3-4')
 f, Z = dt.stack_NEISYS_files(filenames)
 
 # Split data at 1MHz frequency point
-sublist, _ = dt.split_array(f, Z=None, split_freq=1e6)
+sublist, _ = dt.split_array(f, Z=None, split_freq=np.max(f))
 N_sub = len(sublist)
 
 # Temperature points for measurements (in Celsius)
