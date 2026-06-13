@@ -324,9 +324,9 @@ def fit_report(f, Z, params, circuit, UB, LB, weight_mtd, method, single_chi):
         row_labels = [label + ' :' for label in labels]
         
        # Create correlation matrix DataFrame with proper diagonal values
+        CM = np.array(CM, dtype=float).round(3)  # Round all values first
+        np.fill_diagonal(CM, 1.000)  # Set diagonal to 1.000 (3 decimal places)
         CorrM = pd.DataFrame(CM, columns=labels, index=row_labels)
-        CorrM = CorrM.round(3)  # Round all values first
-        np.fill_diagonal(CorrM.values, 1.000)  # Set diagonal to 1.000 (3 decimal places)
         mask_upper = np.triu(np.ones(CorrM.shape), k=1).astype(bool)  # Mask above diagonal only
         CorrM = CorrM.mask(mask_upper)
         CorrM = CorrM.fillna('')  # Replace NaN with empty string
