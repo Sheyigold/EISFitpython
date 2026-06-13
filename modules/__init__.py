@@ -7,4 +7,4 @@ S. C. Adediwura, N. Mathew, J. Schmedt auf der Günne, J. Mater. Chem. A 12 (202
 https://doi.org/10.1039/d3ta06237f
 """
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
