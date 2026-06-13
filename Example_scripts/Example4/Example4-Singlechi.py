@@ -23,11 +23,16 @@ from EISFitpython import EIS_Batchfit as ebf
 # Get EIS data files
 filenames=dt.get_eis_files(base_path='../../EIS_Data', subfolder='Example-3-4')
 
-# Extract frequency and impedance data from NEISYS spectrometer files
-f, Z = dt.stack_NEISYS_files(filenames)
+# Extract frequency and impedance data from NEISYS spectrometer files.
+# return_lengths=True also hands back the per-file point counts so the stacked
+# spectrum can be split back exactly, with no reliance on frequency heuristics.
+f, Z, lengths = dt.stack_NEISYS_files(filenames, return_lengths=True)
 
-# Split data at 1MHz frequency point
-sublist, _ = dt.split_array(f, Z=None, split_freq=np.max(f))
+# Split the stacked spectrum into one sublist per temperature.
+# Passing lengths= performs an exact, heuristic-free split (recommended).
+# The default (no lengths=) auto-detects each dataset by sweep reset and is
+# robust to float noise and to datasets with different maximum frequencies.
+sublist, _ = dt.split_array(f, lengths=lengths)
 N_sub = len(sublist)
 
 # Temperature points for measurements (in Celsius)

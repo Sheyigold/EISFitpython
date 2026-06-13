@@ -110,8 +110,9 @@ The choice of weighting method significantly impacts the fitting quality. EISFit
 - Matplotlib ≥ 3.3.0
 - Pandas ≥ 1.2.0
 
-### Platform Independent Installation Steps
-Download the latest release from the GitHub Releases page, then install it with pip:
+### Install from a release artifact
+Download the latest release from the GitHub Releases page, then install it with pip
+(dependencies are resolved automatically):
 
 ```bash
 python -m pip install eisfitpython-<version>.tar.gz
@@ -119,9 +120,20 @@ python -m pip install eisfitpython-<version>.tar.gz
 python -m pip install eisfitpython-<version>-py3-none-any.whl
 ```
 
-### Install required packages:
+### Install from source
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/Sheyigold/EISFitpython.git
+cd EISFitpython
+python -m pip install .          # add -e for an editable/development install
+```
+
+After installation the package is importable as `EISFitpython`, e.g.
+`from EISFitpython import data_extraction as dt`.
+
+### Build the distribution artifacts yourself
+```bash
+python -m pip install build
+python -m build                  # writes sdist + wheel to dist/
 ```
 
 ## Core Modules Overview
@@ -138,6 +150,8 @@ Core module for defining and evaluating equivalent circuit models.
 - `Q`: Constant Phase Element (Z = 1/[Q(jω)ᵅ])
 - `W`: Warburg Element (Z = σω^(-1/2)(1-j))
 - `F`: Finite-length Warburg (Z = σ·tanh(√(jωτ))/√(jωτ))
+- `G`: Gerischer Element (parameters: G, t)
+- `H`: Finite-length Gerischer (parameters: H, t, φ)
 
 #### Circuit String Syntax
 - Series connections: `+`
@@ -386,12 +400,15 @@ import numpy as np
 # Get EIS data files
 filenames=dt.get_eis_files(base_path='../EIS_Data', subfolder='temp_series')
 
-# Extract frequency and impedance data from NEISYS spectrometer files
+# Extract frequency and impedance data from NEISYS spectrometer files.
+# return_lengths=True also returns the per-file point counts for an exact split.
+f, Z, lengths = dt.stack_NEISYS_files(filenames, return_lengths=True)
 
-f, Z = dt.stack_NEISYS_files(filenames)
-
-# Split data at 1MHz frequency point
-sublist, _ = dt.split_array(f, Z=None, split_freq=np.max(f))
+# Split the stacked spectrum into one sublist per temperature.
+# lengths= gives an exact, heuristic-free split (recommended). Omitting it
+# auto-detects each dataset by sweep reset (robust to float noise and to
+# datasets with different maximum frequencies).
+sublist, _ = dt.split_array(f, lengths=lengths)
 N_sub = len(sublist)
 
 # Temperature points (in Celsius)

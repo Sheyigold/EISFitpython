@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eisfitpython"
+version = "0.5.0"
+description = "Electrochemical Impedance Spectroscopy (EIS) analysis with unified global-local chi-square fitting for temperature-dependent experiments."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Sheyi Clement Adediwura" },
+]
+keywords = ["EIS", "impedance", "spectroscopy", "electrochemistry", "curve-fitting", "equivalent-circuit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.19.0",
+    "scipy>=1.6.0",
+    "matplotlib>=3.3.0",
+    "pandas>=1.2.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://github.com/Sheyigold/EISFitpython"
+Repository = "https://github.com/Sheyigold/EISFitpython"
+
+# The importable package is `EISFitpython`; its sources live in the `modules/`
+# directory (the modules import each other as `from EISFitpython import ...`).
+[tool.setuptools]
+packages = ["EISFitpython"]
+
+[tool.setuptools.package-dir]
+EISFitpython = "modules"
