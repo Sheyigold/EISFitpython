@@ -138,6 +138,12 @@ python -m build                  # writes sdist + wheel to dist/
 
 ## Core Modules Overview
 
+> [!TIP]
+> The README provides an overview. The standalone [documentation site](docs/index.md)
+> contains task-oriented guides, circuit syntax, output-file behavior, and a complete
+> function-by-function API reference. Build it locally with
+> `python -m pip install -e ".[docs]"` followed by `mkdocs serve`.
+
 ### 1. Circuit Module (circuit_main.py)
 
 Core module for defining and evaluating equivalent circuit models.

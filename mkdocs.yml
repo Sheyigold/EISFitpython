@@ -1,0 +1,70 @@
+site_name: EISFitpython
+site_description: API and workflow documentation for EISFitpython
+site_url: https://sheyigold.github.io/EISFitpython/
+repo_url: https://github.com/Sheyigold/EISFitpython
+repo_name: Sheyigold/EISFitpython
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - User guide:
+      - Circuit models: guides/circuit-models.md
+      - Reading and preparing data: guides/data-handling.md
+      - Fitting one spectrum: guides/single-spectrum-fitting.md
+      - Batch and Arrhenius analysis: guides/batch-analysis.md
+      - Global-local fitting: guides/global-local-fitting.md
+      - Plotting and modulus analysis: guides/plotting.md
+  - API reference:
+      - Overview: api/index.md
+      - circuit_main: api/circuit-main.md
+      - data_extraction: api/data-extraction.md
+      - EISFit_main: api/eisfit-main.md
+      - EIS_Batchfit: api/eis-batchfit.md
+      - singlechi: api/singlechi.md
+  - Generated files: generated-files.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+strict: true
